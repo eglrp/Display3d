@@ -1,4 +1,5 @@
 /* Created by sugar10w, 2016.5.10
+ * Last edited by sugar10w, 2016.5.13
  * 
  * 可以动画的点云
  */
@@ -16,8 +17,7 @@ AnimateCloud::AnimateCloud(PointCloudPtr cloud, std::string reg_name)
 {
     // copy to display_cloud_
     display_cloud_->resize(size_);
-    for (int i=0; i<size_; ++i)
-    {
+    for (int i=0; i<size_; ++i) {
         PointT & p1 = display_cloud_->points[i];
         PointT & p2 = target_cloud_->points[i];
         p1.x = p1.y = p1.z = 0;
@@ -33,14 +33,12 @@ void AnimateCloud::setAnimateStatus(AnimateStatus status)
 {
     status_ = status; 
 
-    switch (status_)
-    {
+    switch (status_) {
     case AnimateStatus::Stop:
         count_ = 0; max_count_ = 0;
         break;
     case AnimateStatus::Appear:
-        for (int i=0; i<size_; ++i)
-        {
+        for (int i=0; i<size_; ++i) {
             PointT & pt1 = display_cloud_->points[i];
             PointT & pt2 = target_cloud_->points[i];
             pt1.x = pt2.x;
@@ -50,8 +48,7 @@ void AnimateCloud::setAnimateStatus(AnimateStatus status)
         visible_ = true;
         break;
     case AnimateStatus::Disappear:
-        for (int i=0; i<size_; ++i)
-        {
+        for (int i=0; i<size_; ++i) {
             PointT & pt1 = display_cloud_->points[i];
             pt1.x =  pt1.y = pt1.z = 0;
         }
@@ -64,21 +61,18 @@ void AnimateCloud::setAnimateStatus(AnimateStatus status)
     case AnimateStatus::Plane:
         visible_ = true; 
         count_ = 0; max_count_ = 30; 
-        if (plane_cloud_->points.size()==0)
-        {
+        if (plane_cloud_->points.size()==0) {
+            // calculate plane_cloud_
             plane_cloud_->resize(size_);
-            for (int i=0; i<size_; ++i)
-            {
+            for (int i=0; i<size_; ++i) {
                 PointT & pt1 = plane_cloud_->points[i];
                 PointT & pt2 = target_cloud_->points[i];
-                if (pt2.z!=0)
-                {
+                if (pt2.z!=0) {
                     pt1.x = pt2.x / pt2.z;
                     pt1.y = pt2.y / pt2.z;
                     pt1.z = 1;
                 }
-                else
-                {
+                else {
                     pt1.x = pt1.y = pt1.z = 0;
                 }
             }
@@ -89,11 +83,10 @@ void AnimateCloud::setAnimateStatus(AnimateStatus status)
         count_ = 0; max_count_ = 60; 
         break;
     case AnimateStatus::Bursting:
-        //visible_ = true;
-        count_ = 0; max_count_ = 5;
+        if (visible_) { count_ = 0; max_count_ = 5; }
         break;
     case AnimateStatus::Zero:
-        count_ = 0; max_count_ = 20; 
+        if (visible_) { count_ = 0; max_count_ = 20; }
         break;
     }
 }
@@ -105,8 +98,7 @@ void AnimateCloud::Refresh()
     case AnimateStatus::Stop:
         break;
     case AnimateStatus::Target:
-        for (int i=0; i<size_; ++i)
-        {
+        for (int i=0; i<size_; ++i) {
             PointT & p1 = display_cloud_->points[i];
             PointT & p2 = target_cloud_->points[i];
             p1.x = p1.x * k1 + p2.x * k2;
@@ -116,8 +108,7 @@ void AnimateCloud::Refresh()
         ++count_; if (count_==max_count_) setAnimateStatus(AnimateStatus::Stop);
         break;
     case AnimateStatus::Plane:
-        for (int i=0; i<size_; ++i)
-        {
+        for (int i=0; i<size_; ++i) {
             PointT & p1 = display_cloud_->points[i];
             PointT & p2 = plane_cloud_->points[i];
             p1.x = p1.x * k1 + p2.x * k2;
@@ -127,8 +118,8 @@ void AnimateCloud::Refresh()
         ++count_; if (count_==max_count_) setAnimateStatus(AnimateStatus::Stop);
         break;
     case AnimateStatus::Counting:
-        for (int i=size_/max_count_*count_; i<size_/max_count_*(count_+1); ++i)
-        {
+        for (int i=size_/max_count_*count_;
+                 i<size_/max_count_*(count_+1); ++i) {
             if (i>=size_) break;
             PointT & p1 = display_cloud_->points[i];
             PointT & p2 = target_cloud_->points[i];
@@ -139,8 +130,7 @@ void AnimateCloud::Refresh()
         ++count_; if (count_==max_count_) setAnimateStatus(AnimateStatus::Stop);
         break;
     case AnimateStatus::Bursting:
-        for (int i=0; i<size_; ++i)
-        {
+        for (int i=0; i<size_; ++i) {
             PointT & p1 = display_cloud_->points[i];
             PointT & p2 = plane_cloud_->points[i];
             p1.x = p1.x * k0;
@@ -150,8 +140,7 @@ void AnimateCloud::Refresh()
         ++count_; if (count_==max_count_) { setAnimateStatus(AnimateStatus::Stop); visible_ = false; }
         break;
     case AnimateStatus::Zero:
-        for (int i=0; i<size_; ++i)
-        {
+        for (int i=0; i<size_; ++i) {
             PointT & p1 = display_cloud_->points[i];
             p1.x = p1.x * k1;
             p1.y = p1.y * k1;
